@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сроки сдачи</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .menu { display: flex; gap: 10px; margin-bottom: 30px; }
+        .menu a { padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; }
+        .table { width: 100%; border-collapse: collapse; }
+        .table th, .table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        .table th { background-color: #f5f5f5; }
+        .status-pending { color: #ffc107; }
+        .status-submitted { color: #28a745; }
+        .status-overdue { color: #dc3545; }
+        .status-extended { color: #17a2b8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Сроки сдачи</h1>
+            <div>
+                <span>Вы вошли как: {{ current_user.full_name }}</span>
+                <form class="logout-form" action="/logout" method="post" style="display: inline;">
+                    <button style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;" type="submit">Выйти</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="menu">
+            <a href="/">Главная</a>
+            <a href="/tax-forms-page">Налоговые формы</a>
+            <a href="/deadlines-page">Сроки сдачи</a>
+            <a href="/notifications-page">Уведомления</a>
+            <a href="/docs" target="_blank">API Документация</a>
+        </div>
+
+        <h2>Список сроков сдачи</h2>
+
+        {% if deadlines %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Налоговая форма</th>
+                    <th>Дата сдачи</th>
+                    <th>Фактическая дата</th>
+                    <th>Статус</th>
+                    <th>Штраф</th>
+                    <th>Комментарий</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for deadline in deadlines %}
+                <tr>
+                    <td>
+                        {% if deadline.tax_form %}
+                            {{ deadline.tax_form.form_name }} ({{ deadline.tax_form.form_code }})
+                        {% else %}
+                            Неизвестная форма
+                        {% endif %}
+                    </td>
+                    <td>{{ deadline.deadline_date.strftime('%d.%m.%Y') }}</td>
+                    <td>
+                        {% if deadline.submission_date %}
+                            {{ deadline.submission_date.strftime('%d.%m.%Y') }}
+                        {% else %}
+                            Не сдано
+                        {% endif %}
+                    </td>
+                    <td class="status-{{ deadline.status }}">
+                        {% if deadline.status == 'pending' %}Ожидает
+                        {% elif deadline.status == 'submitted' %}Сдано
+                        {% elif deadline.status == 'overdue' %}Просрочено
+                        {% elif deadline.status == 'extended' %}Продлено
+                        {% else %}{{ deadline.status }}{% endif %}
+                    </td>
+                    <td>{{ deadline.penalty_amount or 0 }} руб.</td>
+                    <td>{{ deadline.comment or '' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>У вас пока нет сроков сдачи. Используйте API для создания дедлайнов.</p>
+        <p>Откройте <a href="/docs">документацию API</a> для создания дедлайнов.</p>
+        {% endif %}
+
+        <div style="margin-top: 30px;">
+            <a href="/" style="padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 4px;">На главную</a>
+        </div>
+    </div>
+</body>
+</html>

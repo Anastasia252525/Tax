@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Уведомления</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .menu { display: flex; gap: 10px; margin-bottom: 30px; }
+        .menu a { padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; }
+        .notification { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 5px; }
+        .notification.unread { background-color: #f8f9fa; border-left: 4px solid #007bff; }
+        .notification.read { background-color: #e9ecef; opacity: 0.8; }
+        .notification-title { font-weight: bold; margin-bottom: 5px; }
+        .notification-date { color: #6c757d; font-size: 0.9em; }
+        .notification-type { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; margin-right: 10px; }
+        .type-info { background-color: #17a2b8; color: white; }
+        .type-warning { background-color: #ffc107; color: black; }
+        .type-error { background-color: #dc3545; color: white; }
+        .type-success { background-color: #28a745; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Уведомления</h1>
+            <div>
+                <span>Вы вошли как: {{ current_user.full_name }}</span>
+                <form class="logout-form" action="/logout" method="post" style="display: inline;">
+                    <button style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;" type="submit">Выйти</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="menu">
+            <a href="/">Главная</a>
+            <a href="/tax-forms-page">Налоговые формы</a>
+            <a href="/deadlines-page">Сроки сдачи</a>
+            <a href="/notifications-page">Уведомления</a>
+            <a href="/docs" target="_blank">API Документация</a>
+        </div>
+
+        <h2>Список уведомлений</h2>
+
+        {% if notifications %}
+            {% for notification in notifications %}
+            <div class="notification {% if notification.is_read %}read{% else %}unread{% endif %}">
+                <div>
+                    <span class="notification-type type-{{ notification.notification_type }}">
+                        {% if notification.notification_type == 'info' %}Инфо
+                        {% elif notification.notification_type == 'warning' %}Предупреждение
+                        {% elif notification.notification_type == 'error' %}Ошибка
+                        {% elif notification.notification_type == 'success' %}Успех
+                        {% else %}{{ notification.notification_type }}{% endif %}
+                    </span>
+                    <span class="notification-title">{{ notification.title }}</span>
+                </div>
+                <div style="margin: 10px 0;">{{ notification.message }}</div>
+                <div class="notification-date">
+                    Создано: {{ notification.created_at.strftime('%d.%m.%Y %H:%M') }}
+                    {% if notification.is_read %}
+                        | Прочитано: {{ notification.read_at.strftime('%d.%m.%Y %H:%M') }}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <p>У вас пока нет уведомлений.</p>
+        {% endif %}
+
+        <div style="margin-top: 30px;">
+            <a href="/" style="padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 4px;">На главную</a>
+        </div>
+    </div>
+</body>
+</html>

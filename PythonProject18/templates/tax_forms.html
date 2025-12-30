@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Налоговые формы</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .menu { display: flex; gap: 10px; margin-bottom: 30px; }
+        .menu a { padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; }
+        .table { width: 100%; border-collapse: collapse; }
+        .table th, .table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        .table th { background-color: #f5f5f5; }
+        .btn { padding: 8px 16px; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-primary { background: #007bff; }
+        .btn-success { background: #28a745; }
+        .btn-danger { background: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Налоговые формы</h1>
+            <div>
+                <span>Вы вошли как: {{ current_user.full_name }}</span>
+                <form class="logout-form" action="/logout" method="post" style="display: inline;">
+                    <button class="btn btn-danger" type="submit">Выйти</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="menu">
+            <a href="/">Главная</a>
+            <a href="/tax-forms-page">Налоговые формы</a>
+            <a href="/deadlines-page">Сроки сдачи</a>
+            <a href="/notifications-page">Уведомления</a>
+            <a href="/docs" target="_blank">API Документация</a>
+        </div>
+
+        <h2>Список налоговых форм</h2>
+
+        {% if tax_forms %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Код формы</th>
+                    <th>Название</th>
+                    <th>Описание</th>
+                    <th>Налоговый период</th>
+                    <th>Дата создания</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in tax_forms %}
+                <tr>
+                    <td>{{ form.form_code }}</td>
+                    <td>{{ form.form_name }}</td>
+                    <td>{{ form.description or '' }}</td>
+                    <td>
+                        {% if form.tax_period == 'month' %}Месяц
+                        {% elif form.tax_period == 'quarter' %}Квартал
+                        {% elif form.tax_period == 'year' %}Год
+                        {% else %}{{ form.tax_period }}{% endif %}
+                    </td>
+                    <td>{{ form.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>У вас пока нет налоговых форм. Используйте API для создания форм.</p>
+        <p>Откройте <a href="/docs">документацию API</a> для создания форм.</p>
+        {% endif %}
+
+        <div style="margin-top: 30px;">
+            <a href="/" class="btn btn-primary">На главную</a>
+        </div>
+    </div>
+</body>
+</html>
